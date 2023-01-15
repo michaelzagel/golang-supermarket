@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oldfrontend-deployment
+  labels:
+    app: oldfrontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oldfrontend
+  template:
+    metadata:
+      labels:
+        app: oldfrontend
+    spec:
+      containers:
+      - name: oldfrontend
+        image: oldfrontend:latest
+        ports:
+        - containerPort: 80

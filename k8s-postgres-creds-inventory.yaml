@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-creds-inventory
+data:
+  PGHOST: inventory.supermarket.us-east-2.rds.amazonaws.com
+  PGDATABASE: supermarket-inventory
+  PGUSER: postgres
+  PGPASSWORD: p0stgr3z

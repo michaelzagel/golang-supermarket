@@ -1,0 +1,834 @@
+{
+    "name": "golang-supermarket",
+    "packaging": {
+        "dockerfile": true
+    },
+    "kubernetes": {
+        "configmaps": {
+            "postgres-creds-inventory": {
+                "PGHOST": "inventory.supermarket.us-east-2.rds.amazonaws.com",
+                "PGDATABASE": "supermarket-inventory",
+                "PGUSER": "postgres",
+                "PGPASSWORD": "p0stgr3z"
+            },
+            "postgres-creds-cust": {
+                "PGHOST": "cust.supermarket.us-west-1.rds.amazonaws.com",
+                "PGDATABASE": "supermarket-customers",
+                "PGUSER": "supermarket",
+                "PGPASSWORD": "ICanHazPassword"
+            }
+        }
+    },
+    "services": {
+        "frontend": {
+            "type": "rest",
+            "rest_framework": "gorilla-mux",
+            "rpcs": {
+                "Register": {
+                    "path": "/register",
+                    "verb": "POST",
+                    "input": {
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "delivery_address": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "customers",
+                            "rpc": "Register",
+                            "args": [
+                                "email",
+                                "delivery_address",
+                                "password"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        }
+                    ]
+                },
+                "SignIn": {
+                    "path": "/signin",
+                    "verb": "POST",
+                    "input": {
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        },
+                        "access_token": {
+                            "type": "string"
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "auth",
+                            "rpc": "SignIn",
+                            "args": [
+                                "email",
+                                "password"
+                            ],
+                            "takes": [
+                                "access_token"
+                            ]
+                        }
+                    ]
+                },
+                "StartOrder": {
+                    "path": "/orders",
+                    "verb": "POST",
+                    "input": {
+                        "access_token": {
+                            "type": "string",
+                            "required": true,
+                            "in": "header",
+                            "header": "Authorization"
+                        }
+                    },
+                    "output": {
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "auth",
+                            "rpc": "VerifyToken",
+                            "args": [
+                                "access_token"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        },
+                        {
+                            "service": "orders",
+                            "rpc": "Start",
+                            "args": [
+                                "customer_id"
+                            ],
+                            "takes": [
+                                "order_id"
+                            ]
+                        }
+                    ]
+                },
+                "AddItem": {
+                    "path": "/orders/{order_id}/items",
+                    "verb": "POST",
+                    "input": {
+                        "access_token": {
+                            "type": "string",
+                            "required": true,
+                            "in": "header",
+                            "header": "Authorization"
+                        },
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true,
+                            "in": "path"
+                        },
+                        "name": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "quantity": {
+                            "type": "number",
+                            "format": "float",
+                            "default": 1
+                        }
+                    },
+                    "output": {
+                        "item_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "auth",
+                            "rpc": "VerifyToken",
+                            "args": [
+                                "access_token"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        },
+                        {
+                            "service": "orders",
+                            "rpc": "AddItem",
+                            "args": [
+                                "order_id",
+                                "name",
+                                "quantity"
+                            ],
+                            "takes": [
+                                "item_id"
+                            ]
+                        }
+                    ]
+                },
+                "FinishOrder": {
+                    "path": "/orders/{order_id}/finish",
+                    "verb": "POST",
+                    "input": {
+                        "access_token": {
+                            "type": "string",
+                            "required": true,
+                            "in": "header",
+                            "header": "Authorization"
+                        },
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true,
+                            "in": "path"
+                        },
+                        "credit_card": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "window_from": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        },
+                        "window_to": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "auth",
+                            "rpc": "VerifyToken",
+                            "args": [
+                                "access_token"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        },
+                        {
+                            "service": "orders",
+                            "rpc": "Finish",
+                            "args": [
+                                "order_id",
+                                "credit_card"
+                            ],
+                            "takes": [
+                                "window_from",
+                                "window_to"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "kubernetes": {
+                "daemonset": true,
+                "ingress": true
+            }
+        },
+        "customers": {
+            "type": "grpc",
+            "rpcs": {
+                "Register": {
+                    "input": {
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "delivery_address": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "postgresql",
+                            "sql": "INSERT INTO customers (email, address, password) VALUES ($1, $2, $3) RETURNING customer_id",
+                            "args": [
+                                "email",
+                                "delivery_address",
+                                "password"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        }
+                    ]
+                },
+                "GetInfo": {
+                    "input": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "email": {
+                            "type": "string"
+                        }
+                    },
+                    "output": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "delivery_address": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                },
+                "VerifyPassword": {
+                    "input": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true,
+                "configmaps": ["postgres-creds-cust"]
+            }
+        },
+        "auth": {
+            "type": "grpc",
+            "rpcs": {
+                "SignIn": {
+                    "input": {
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "access_token": {
+                            "type": "string",
+                            "format": "password",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "customers",
+                            "rpc": "GetInfo",
+                            "args": [
+                                "email"
+                            ],
+                            "takes": [
+                                "customer_id"
+                            ]
+                        },
+                        {
+                            "service": "customers",
+                            "rpc": "VerifyPassword",
+                            "args": [
+                                "customer_id",
+                                "password"
+                            ],
+                            "taken": [
+                                "access_token"
+                            ]
+                        }
+                    ]
+                },
+                "VerifyToken": {
+                    "input": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "access_token": {
+                            "type": "string",
+                            "format": "password",
+                            "requireD": true
+                        }
+                    },
+                    "output": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true
+            }
+        },
+        "orders": {
+            "type": "grpc",
+            "rpcs": {
+                "Start": {
+                    "input": {
+                        "customer_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "postgresql",
+                            "sql": "INSERT INTO orders (customer_id) VALUES ($1) RETURNING order_id",
+                            "args": [
+                                "customer_id"
+                            ],
+                            "takes": [
+                                "order_id"
+                            ],
+                            "force_injection": true
+                        }
+                    ]
+                },
+                "AddItem": {
+                    "input": {
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "name": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "quantity": {
+                            "type": "number",
+                            "format": "float",
+                            "default": 1
+                        }
+                    },
+                    "output": {
+                        "item_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "inventory",
+                            "rpc": "FindItem",
+                            "args": [
+                                "name"
+                            ],
+                            "takes": [
+                                "sku"
+                            ]
+                        },
+                        {
+                            "service": "pricing",
+                            "rpc": "GetPrice",
+                            "args": [
+                                "sku",
+                                "quantity"
+                            ],
+                            "takes": [
+                                "price"
+                            ]
+                        },
+                        {
+                            "service": "postgresql",
+                            "sql": "INSERT INTO order_items (order_id, sku, quantity, price) VALUES ($1, $2, $3, $4) RETURNING item_id",
+                            "args": [
+                                "order_id",
+                                "sku",
+                                "quantity",
+                                "price"
+                            ],
+                            "takes": [
+                                "item_id"
+                            ]
+                        }
+                    ]
+                },
+                "Finish": {
+                    "input": {
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "credit_card": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        },
+                        "window_from": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        },
+                        "window_to": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "payments",
+                            "rpc": "TakePayment",
+                            "args": [
+                                "credit_card",
+                                "amount"
+                            ]
+                        },
+                        {
+                            "service": "customers",
+                            "rpc": "GetInfo",
+                            "args": [
+                                "customer_id"
+                            ],
+                            "takes": [
+                                "delivery_address"
+                            ]
+                        },
+                        {
+                            "service": "delivery",
+                            "rpc": "SelectWindow",
+                            "args": [
+                                "delivery_address"
+                            ],
+                            "takes": [
+                                "window_from",
+                                "window_to"
+                            ]
+                        },
+                        {
+                            "service": "notification",
+                            "rpc": "NotifyWindow",
+                            "args": [
+                                "order_id",
+                                "window_from",
+                                "window_to"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "kubernetes": {
+                "replicaset": true,
+                "configmaps": ["postgres-creds-cust"]
+            }
+        },
+        "inventory": {
+            "type": "grpc",
+            "rpcs": {
+                "FindItem": {
+                    "input": {
+                        "name": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "sku": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "postgresql",
+                            "sql": "SELECT sku FROM inventory WHERE name = $1",
+                            "args": [
+                                "name"
+                            ],
+                            "takes": [
+                                "sku"
+                            ],
+                            "force_injection": true
+                        }
+                    ]
+                }
+            },
+            "kubernetes": {
+                "replicaset": true,
+                "ingress": true,
+                "configmaps": ["postgres-creds-inventory"]
+            }
+        },
+        "pricing": {
+            "type": "grpc",
+            "rpcs": {
+                "GetPrice": {
+                    "input": {
+                        "sku": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "quantity": {
+                            "type": "number",
+                            "format": "float",
+                            "default": 1
+                        }
+                    },
+                    "output": {
+                        "price": {
+                            "type": "number",
+                            "format": "float",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true
+            }
+        },
+        "payments": {
+            "type": "grpc",
+            "rpcs": {
+                "TakePayment": {
+                    "input": {
+                        "credit_card": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "amount": {
+                            "type": "number",
+                            "format": "float",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true
+            }
+        },
+        "delivery": {
+            "type": "grpc",
+            "rpcs": {
+                "SelectWindow": {
+                    "input": {
+                        "delivery_address": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "window_from": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        },
+                        "window_to": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true
+            }
+        },
+        "notification": {
+            "type": "rest",
+            "rest_framework": "gorilla-mux",
+            "rpcs": {
+                "NotifyWindow": {
+                    "path": "/notify_window",
+                    "verb": "POST",
+                    "input": {
+                        "order_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "required": true
+                        },
+                        "window_from": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        },
+                        "window_to": {
+                            "type": "string",
+                            "format": "date-time",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "success": {
+                            "type": "boolean",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "replicaset": true
+            }
+        },
+        "oldfrontend": {
+            "type": "rest",
+            "rest_framework": "gorilla-mux",
+            "kubernetes": {
+                "replicaset": true
+            },
+            "rpcs": {
+                "Login": {
+                    "path": "/login",
+                    "verb": "POST",
+                    "input": {
+                        "username": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "output": {
+                        "access_token": {
+                            "type": "string"
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "oldbackend",
+                            "rpc": "CreateUser",
+                            "args": [
+                                "username",
+                                "password"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "oldbackend": {
+            "type": "rest",
+            "rest_framework": "gorilla-mux",
+            "kubernetes": {
+                "replicaset": true
+            },
+            "rpcs": {
+                "CreateUser": {
+                    "path": "/users",
+                    "verb": "POST",
+                    "input": {
+                        "username": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "calls": [
+                        {
+                            "service": "postgresql",
+                            "sql": "INSERT INTO users (username, password) VALUES ($1, $2)",
+                            "args": [
+                                "username",
+                                "password"
+                            ],
+                            "force_injection": true
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package orders;
+
+option go_package = "github.com/backslash-security-tests/golang-supermarket/orders;orders";
+
+service Orders {
+    rpc Finish (FinishInput) returns (FinishOutput) {}
+    rpc Start (StartInput) returns (StartOutput) {}
+    rpc AddItem (AddItemInput) returns (AddItemOutput) {}
+}
+
+message AddItemInput {
+    int64 order_id = 1;
+    string name = 2;
+    optional float quantity = 3;
+}
+
+message AddItemOutput {
+    int64 item_id = 1;
+}
+
+message FinishInput {
+    int64 order_id = 1;
+    string credit_card = 2;
+}
+
+message FinishOutput {
+    bool success = 1;
+    string window_from = 2;
+    string window_to = 3;
+}
+
+message StartInput {
+    int64 customer_id = 1;
+}
+
+message StartOutput {
+    int64 order_id = 1;
+}
+

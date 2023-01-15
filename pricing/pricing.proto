@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pricing;
+
+option go_package = "github.com/backslash-security-tests/golang-supermarket/pricing;pricing";
+
+service Pricing {
+    rpc GetPrice (GetPriceInput) returns (GetPriceOutput) {}
+}
+
+message GetPriceInput {
+    int64 sku = 1;
+    optional float quantity = 2;
+}
+
+message GetPriceOutput {
+    float price = 1;
+}
+
