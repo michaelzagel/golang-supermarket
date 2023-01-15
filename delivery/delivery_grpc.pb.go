@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // DeliveryClient is the client API for Delivery service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DeliveryClient interface {
+type DeliveryClient {
 	SelectWindow(ctx context.Context, in *SelectWindowInput, opts ...grpc.CallOption) (*SelectWindowOutput, error)
 }
 
@@ -46,7 +46,7 @@ func (c *deliveryClient) SelectWindow(ctx context.Context, in *SelectWindowInput
 // DeliveryServer is the server API for Delivery service.
 // All implementations must embed UnimplementedDeliveryServer
 // for forward compatibility
-type DeliveryServer interface {
+type DeliveryServer {
 	SelectWindow(context.Context, *SelectWindowInput) (*SelectWindowOutput, error)
 	mustEmbedUnimplementedDeliveryServer()
 }
@@ -61,9 +61,9 @@ func (UnimplementedDeliveryServer) SelectWindow(context.Context, *SelectWindowIn
 func (UnimplementedDeliveryServer) mustEmbedUnimplementedDeliveryServer() {}
 
 // UnsafeDeliveryServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DeliveryServer will
+// Use of this is not recommended, as added methods to DeliveryServer will
 // result in compilation errors.
-type UnsafeDeliveryServer interface {
+type UnsafeDeliveryServer {
 	mustEmbedUnimplementedDeliveryServer()
 }
 

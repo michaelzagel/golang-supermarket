@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // PaymentsClient is the client API for Payments service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PaymentsClient interface {
+type PaymentsClient {
 	TakePayment(ctx context.Context, in *TakePaymentInput, opts ...grpc.CallOption) (*TakePaymentOutput, error)
 }
 
@@ -46,7 +46,7 @@ func (c *paymentsClient) TakePayment(ctx context.Context, in *TakePaymentInput, 
 // PaymentsServer is the server API for Payments service.
 // All implementations must embed UnimplementedPaymentsServer
 // for forward compatibility
-type PaymentsServer interface {
+type PaymentsServer {
 	TakePayment(context.Context, *TakePaymentInput) (*TakePaymentOutput, error)
 	mustEmbedUnimplementedPaymentsServer()
 }
@@ -61,9 +61,9 @@ func (UnimplementedPaymentsServer) TakePayment(context.Context, *TakePaymentInpu
 func (UnimplementedPaymentsServer) mustEmbedUnimplementedPaymentsServer() {}
 
 // UnsafePaymentsServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PaymentsServer will
+// Use of this is not recommended, as added methods to PaymentsServer will
 // result in compilation errors.
-type UnsafePaymentsServer interface {
+type UnsafePaymentsServer {
 	mustEmbedUnimplementedPaymentsServer()
 }
 

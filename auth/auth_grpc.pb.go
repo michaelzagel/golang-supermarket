@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // AuthClient is the client API for Auth service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type AuthClient interface {
+type AuthClient {
 	SignIn(ctx context.Context, in *SignInInput, opts ...grpc.CallOption) (*SignInOutput, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenInput, opts ...grpc.CallOption) (*VerifyTokenOutput, error)
 }
@@ -56,7 +56,7 @@ func (c *authClient) VerifyToken(ctx context.Context, in *VerifyTokenInput, opts
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility
-type AuthServer interface {
+type AuthServer {
 	SignIn(context.Context, *SignInInput) (*SignInOutput, error)
 	VerifyToken(context.Context, *VerifyTokenInput) (*VerifyTokenOutput, error)
 	mustEmbedUnimplementedAuthServer()
@@ -75,9 +75,9 @@ func (UnimplementedAuthServer) VerifyToken(context.Context, *VerifyTokenInput) (
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
 // UnsafeAuthServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AuthServer will
+// Use of this is not recommended, as added methods to AuthServer will
 // result in compilation errors.
-type UnsafeAuthServer interface {
+type UnsafeAuthServer {
 	mustEmbedUnimplementedAuthServer()
 }
 

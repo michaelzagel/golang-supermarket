@@ -73,7 +73,7 @@ type FindItemOutput struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Sku *int64 `protobuf:"varint,1,opt,name=sku,proto3,oneof" json:"sku,omitempty"`
+	Sku int64 `protobuf:"varint,1,opt,name=sku,proto3,oneof" json:"sku,omitempty"`
 }
 
 func (x *FindItemOutput) Reset() {

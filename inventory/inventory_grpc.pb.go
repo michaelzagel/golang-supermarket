@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // InventoryClient is the client API for Inventory service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type InventoryClient interface {
+type InventoryClient {
 	FindItem(ctx context.Context, in *FindItemInput, opts ...grpc.CallOption) (*FindItemOutput, error)
 }
 
@@ -46,7 +46,7 @@ func (c *inventoryClient) FindItem(ctx context.Context, in *FindItemInput, opts 
 // InventoryServer is the server API for Inventory service.
 // All implementations must embed UnimplementedInventoryServer
 // for forward compatibility
-type InventoryServer interface {
+type InventoryServer {
 	FindItem(context.Context, *FindItemInput) (*FindItemOutput, error)
 	mustEmbedUnimplementedInventoryServer()
 }
@@ -61,9 +61,9 @@ func (UnimplementedInventoryServer) FindItem(context.Context, *FindItemInput) (*
 func (UnimplementedInventoryServer) mustEmbedUnimplementedInventoryServer() {}
 
 // UnsafeInventoryServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to InventoryServer will
+// Use of this is not recommended, as added methods to InventoryServer will
 // result in compilation errors.
-type UnsafeInventoryServer interface {
+type UnsafeInventoryServer {
 	mustEmbedUnimplementedInventoryServer()
 }
 

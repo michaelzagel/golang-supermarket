@@ -27,7 +27,7 @@ type GetPriceInput struct {
 	unknownFields protoimpl.UnknownFields
 
 	Sku      int64    `protobuf:"varint,1,opt,name=sku,proto3" json:"sku,omitempty"`
-	Quantity *float32 `protobuf:"fixed32,2,opt,name=quantity,proto3,oneof" json:"quantity,omitempty"`
+	Quantity float32 `protobuf:"fixed32,2,opt,name=quantity,proto3,oneof" json:"quantity,omitempty"`
 }
 
 func (x *GetPriceInput) Reset() {

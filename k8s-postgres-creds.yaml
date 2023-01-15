@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-creds
-data:
-  PG_USER: postgres
-  PG_PASSWORD: p0stgr3z
-  PG_DATABASE: supermarket

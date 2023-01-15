@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // PricingClient is the client API for Pricing service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PricingClient interface {
+type PricingClient {
 	GetPrice(ctx context.Context, in *GetPriceInput, opts ...grpc.CallOption) (*GetPriceOutput, error)
 }
 
@@ -46,7 +46,7 @@ func (c *pricingClient) GetPrice(ctx context.Context, in *GetPriceInput, opts ..
 // PricingServer is the server API for Pricing service.
 // All implementations must embed UnimplementedPricingServer
 // for forward compatibility
-type PricingServer interface {
+type PricingServer {
 	GetPrice(context.Context, *GetPriceInput) (*GetPriceOutput, error)
 	mustEmbedUnimplementedPricingServer()
 }
@@ -61,9 +61,9 @@ func (UnimplementedPricingServer) GetPrice(context.Context, *GetPriceInput) (*Ge
 func (UnimplementedPricingServer) mustEmbedUnimplementedPricingServer() {}
 
 // UnsafePricingServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PricingServer will
+// Use of this is not recommended, as added methods to PricingServer will
 // result in compilation errors.
-type UnsafePricingServer interface {
+type UnsafePricingServer {
 	mustEmbedUnimplementedPricingServer()
 }
 

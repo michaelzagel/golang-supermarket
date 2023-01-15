@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-creds-cust
-data:
-  PGHOST: cust.supermarket.us-west-1.rds.amazonaws.com
-  PGDATABASE: supermarket-customers
-  PGUSER: supermarket
-  PGPASSWORD: ICanHazPassword

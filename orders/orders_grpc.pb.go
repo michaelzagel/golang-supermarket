@@ -22,27 +22,18 @@ const _ = grpc.SupportPackageIsVersion7
 // OrdersClient is the client API for Orders service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type OrdersClient interface {
-	Finish(ctx context.Context, in *FinishInput, opts ...grpc.CallOption) (*FinishOutput, error)
+type OrdersClient {
 	Start(ctx context.Context, in *StartInput, opts ...grpc.CallOption) (*StartOutput, error)
 	AddItem(ctx context.Context, in *AddItemInput, opts ...grpc.CallOption) (*AddItemOutput, error)
+	Finish(ctx context.Context, in *FinishInput, opts ...grpc.CallOption) (*FinishOutput, error)
 }
 
 type ordersClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewOrdersClient(cc grpc.ClientConnInterface) OrdersClient {
+func NewOrdersClient(cc grpc.ClientConnInterface) ordersClient {
 	return &ordersClient{cc}
-}
-
-func (c *ordersClient) Finish(ctx context.Context, in *FinishInput, opts ...grpc.CallOption) (*FinishOutput, error) {
-	out := new(FinishOutput)
-	err := c.cc.Invoke(ctx, "/orders.Orders/Finish", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *ordersClient) Start(ctx context.Context, in *StartInput, opts ...grpc.CallOption) (*StartOutput, error) {
@@ -63,13 +54,22 @@ func (c *ordersClient) AddItem(ctx context.Context, in *AddItemInput, opts ...gr
 	return out, nil
 }
 
+func (c *ordersClient) Finish(ctx context.Context, in *FinishInput, opts ...grpc.CallOption) (*FinishOutput, error) {
+	out := new(FinishOutput)
+	err := c.cc.Invoke(ctx, "/orders.Orders/Finish", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility
-type OrdersServer interface {
-	Finish(context.Context, *FinishInput) (*FinishOutput, error)
+type OrdersServer {
 	Start(context.Context, *StartInput) (*StartOutput, error)
 	AddItem(context.Context, *AddItemInput) (*AddItemOutput, error)
+	Finish(context.Context, *FinishInput) (*FinishOutput, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -77,44 +77,26 @@ type OrdersServer interface {
 type UnimplementedOrdersServer struct {
 }
 
-func (UnimplementedOrdersServer) Finish(context.Context, *FinishInput) (*FinishOutput, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Finish not implemented")
-}
 func (UnimplementedOrdersServer) Start(context.Context, *StartInput) (*StartOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
 func (UnimplementedOrdersServer) AddItem(context.Context, *AddItemInput) (*AddItemOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddItem not implemented")
 }
+func (UnimplementedOrdersServer) Finish(context.Context, *FinishInput) (*FinishOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Finish not implemented")
+}
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 
 // UnsafeOrdersServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to OrdersServer will
+// Use of this is not recommended, as added methods to OrdersServer will
 // result in compilation errors.
-type UnsafeOrdersServer interface {
+type UnsafeOrdersServer {
 	mustEmbedUnimplementedOrdersServer()
 }
 
 func RegisterOrdersServer(s grpc.ServiceRegistrar, srv OrdersServer) {
 	s.RegisterService(&Orders_ServiceDesc, srv)
-}
-
-func _Orders_Finish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FinishInput)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrdersServer).Finish(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/orders.Orders/Finish",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrdersServer).Finish(ctx, req.(*FinishInput))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Orders_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -153,6 +135,24 @@ func _Orders_AddItem_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_Finish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FinishInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).Finish(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/orders.Orders/Finish",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).Finish(ctx, req.(*FinishInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -161,16 +161,16 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*OrdersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Finish",
-			Handler:    _Orders_Finish_Handler,
-		},
-		{
 			MethodName: "Start",
 			Handler:    _Orders_Start_Handler,
 		},
 		{
 			MethodName: "AddItem",
 			Handler:    _Orders_AddItem_Handler,
+		},
+		{
+			MethodName: "Finish",
+			Handler:    _Orders_Finish_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

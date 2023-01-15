@@ -22,10 +22,10 @@ const _ = grpc.SupportPackageIsVersion7
 // CustomersClient is the client API for Customers service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CustomersClient interface {
-	Register(ctx context.Context, in *RegisterInput, opts ...grpc.CallOption) (*RegisterOutput, error)
+type CustomersClient {
 	GetInfo(ctx context.Context, in *GetInfoInput, opts ...grpc.CallOption) (*GetInfoOutput, error)
 	VerifyPassword(ctx context.Context, in *VerifyPasswordInput, opts ...grpc.CallOption) (*VerifyPasswordOutput, error)
+	Register(ctx context.Context, in *RegisterInput, opts ...grpc.CallOption) (*RegisterOutput, error)
 }
 
 type customersClient struct {
@@ -34,15 +34,6 @@ type customersClient struct {
 
 func NewCustomersClient(cc grpc.ClientConnInterface) CustomersClient {
 	return &customersClient{cc}
-}
-
-func (c *customersClient) Register(ctx context.Context, in *RegisterInput, opts ...grpc.CallOption) (*RegisterOutput, error) {
-	out := new(RegisterOutput)
-	err := c.cc.Invoke(ctx, "/customers.Customers/Register", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *customersClient) GetInfo(ctx context.Context, in *GetInfoInput, opts ...grpc.CallOption) (*GetInfoOutput, error) {
@@ -63,13 +54,22 @@ func (c *customersClient) VerifyPassword(ctx context.Context, in *VerifyPassword
 	return out, nil
 }
 
+func (c *customersClient) Register(ctx context.Context, in *RegisterInput, opts ...grpc.CallOption) (*RegisterOutput, error) {
+	out := new(RegisterOutput)
+	err := c.cc.Invoke(ctx, "/customers.Customers/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CustomersServer is the server API for Customers service.
 // All implementations must embed UnimplementedCustomersServer
 // for forward compatibility
-type CustomersServer interface {
-	Register(context.Context, *RegisterInput) (*RegisterOutput, error)
+type CustomersServer {
 	GetInfo(context.Context, *GetInfoInput) (*GetInfoOutput, error)
 	VerifyPassword(context.Context, *VerifyPasswordInput) (*VerifyPasswordOutput, error)
+	Register(context.Context, *RegisterInput) (*RegisterOutput, error)
 	mustEmbedUnimplementedCustomersServer()
 }
 
@@ -77,44 +77,26 @@ type CustomersServer interface {
 type UnimplementedCustomersServer struct {
 }
 
-func (UnimplementedCustomersServer) Register(context.Context, *RegisterInput) (*RegisterOutput, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
 func (UnimplementedCustomersServer) GetInfo(context.Context, *GetInfoInput) (*GetInfoOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 func (UnimplementedCustomersServer) VerifyPassword(context.Context, *VerifyPasswordInput) (*VerifyPasswordOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyPassword not implemented")
 }
+func (UnimplementedCustomersServer) Register(context.Context, *RegisterInput) (*RegisterOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
 func (UnimplementedCustomersServer) mustEmbedUnimplementedCustomersServer() {}
 
 // UnsafeCustomersServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CustomersServer will
+// Use of this is not recommended, as added methods to CustomersServer will
 // result in compilation errors.
-type UnsafeCustomersServer interface {
+type UnsafeCustomersServer {
 	mustEmbedUnimplementedCustomersServer()
 }
 
 func RegisterCustomersServer(s grpc.ServiceRegistrar, srv CustomersServer) {
 	s.RegisterService(&Customers_ServiceDesc, srv)
-}
-
-func _Customers_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterInput)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CustomersServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/customers.Customers/Register",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CustomersServer).Register(ctx, req.(*RegisterInput))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Customers_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -153,6 +135,24 @@ func _Customers_VerifyPassword_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Customers_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomersServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/customers.Customers/Register",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomersServer).Register(ctx, req.(*RegisterInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Customers_ServiceDesc is the grpc.ServiceDesc for Customers service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -161,16 +161,16 @@ var Customers_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CustomersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Register",
-			Handler:    _Customers_Register_Handler,
-		},
-		{
 			MethodName: "GetInfo",
 			Handler:    _Customers_GetInfo_Handler,
 		},
 		{
 			MethodName: "VerifyPassword",
 			Handler:    _Customers_VerifyPassword_Handler,
+		},
+		{
+			MethodName: "Register",
+			Handler:    _Customers_Register_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
